@@ -1,9 +1,14 @@
-# main 
-from fastapi import FastAPI
-from typing import List, Optional
+"""
+Archivo principal de la API.
+Define los endpoints CRUD para usuarios usando FastAPI.
+"""
+
+from typing import List
 from uuid import UUID, uuid4
-from userModel import Genero, Role, Usuario
-from fastapi import HTTPException
+
+from fastapi import FastAPI, HTTPException
+
+from user_model import Genero, Role, Usuario
 
 app = FastAPI()
 
@@ -38,35 +43,41 @@ db: List[Usuario] = [
     ),
 ]
 
+
 @app.get("/")
-async def root(): 
+async def root():
+    """Endpoint raíz de prueba."""
     return {"saludo": "Hola 8B IDGS hijos de Rando"}
 
-# LEER
+
 @app.get("/api/v1/users")
 async def get_user():
+    """Obtiene la lista de usuarios."""
     return db
 
-# CREAR
+
 @app.post("/api/v1/users", response_model=Usuario)
 async def create_user(user: Usuario):
+    """Crea un nuevo usuario."""
     db.append(user)
     return user
 
-# ACTUALIZAR
+
 @app.put("/api/v1/users/{user_id}", response_model=Usuario)
 async def update_user(user_id: UUID, user_update: Usuario):
+    """Actualiza un usuario existente por su ID."""
     for index, user in enumerate(db):
         if user.id == user_id:
-            user_update.id = user_id   # mantiene el mismo ID
+            user_update.id = user_id
             db[index] = user_update
             return user_update
     raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
-# ELIMINAR
+
 @app.delete("/api/v1/users/{user_id}")
 async def delete_user(user_id: UUID):
-    for user in db:
+    """Elimina un usuario por su ID."""
+    for user in db[:]:
         if user.id == user_id:
             db.remove(user)
             return {"mensaje": "Usuario eliminado correctamente"}
